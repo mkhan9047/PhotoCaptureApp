@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">PhotoCaptureApp</string>
+    <string name="reference_number">Reference Number</string>
+    <string name="exit_app">Exit App</string>
+    <string name="sync_data">Sync Data</string>
+    <string name="view_photos">View Photos</string>
 </resources>

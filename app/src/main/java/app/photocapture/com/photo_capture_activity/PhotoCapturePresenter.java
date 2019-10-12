@@ -1,15 +1,34 @@
 package app.photocapture.com.photo_capture_activity;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
+import android.os.StrictMode;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
+import android.widget.Toast;
+
+import androidx.annotation.RequiresApi;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import app.photocapture.com.util.Constants;
 
 class PhotoCapturePresenter {
 
+    Activity activity;
+
     private PhotoCaptureMvpView photoCaptureMvpView;
 
-    PhotoCapturePresenter(PhotoCaptureMvpView photoCaptureMvpView) {
+    PhotoCapturePresenter(PhotoCaptureMvpView photoCaptureMvpView,
+                          Activity activity
+    ) {
+        this.activity = activity;
         this.photoCaptureMvpView = photoCaptureMvpView;
     }
 
@@ -19,11 +38,6 @@ class PhotoCapturePresenter {
         boolean success = true;
         if (!folder.exists()) {
             success = folder.mkdirs();
-        }
-        if (success) {
-            photoCaptureMvpView.onFolderCreateSuccess();
-        } else {
-            photoCaptureMvpView.onFolderCreateError();
         }
     }
 
@@ -42,14 +56,6 @@ class PhotoCapturePresenter {
         }
     }
 
-    public void saveVideo() {
-
-    }
-
-    public void saveImage() {
-
-    }
-
     void checkIfFolderExists(String name) {
         File folder = new File(Environment.getExternalStorageDirectory() +
                 File.separator + app.photocapture.com.util.Constants.File.ROOT_FOLDER_NAME
@@ -59,6 +65,15 @@ class PhotoCapturePresenter {
         } else {
             photoCaptureMvpView.onFolderNotFound();
         }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    void openRootFolder(Activity activity) {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        Uri uri = Uri.parse(Environment.getExternalStorageDirectory().getPath()
+                + File.separator + Constants.File.ROOT_FOLDER_NAME);
+        intent.setDataAndType(uri, "text/csv");
+        activity.startActivity(intent);
     }
 
 }

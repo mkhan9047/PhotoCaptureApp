@@ -6,4 +6,6 @@
     <string name="view_photos">View Photos</string>
     <string name="txt_setting">Setting</string>
     <string name="required_permission">Please give the required permissions!</string>
+    <string name="something_went_wrong">Something went wrong!</string>
+    <string name="saved_successfully">Saved successfully!</string>
 </resources>

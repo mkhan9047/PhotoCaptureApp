@@ -5,9 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
-
 import com.google.zxing.Result;
-
 import app.photocapture.com.R;
 import app.photocapture.com.photo_capture_activity.PhotoCaptureActivity;
 import app.photocapture.com.util.Constants;

@@ -1,22 +1,44 @@
 package app.photocapture.com.photo_capture_activity;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.cardview.widget.CardView;
 
 import android.Manifest;
+import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.StrictMode;
+import android.provider.MediaStore;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.MediaController;
 import android.widget.Toast;
+import android.widget.VideoView;
+
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import app.photocapture.com.R;
 import app.photocapture.com.qr_code_scan.QrCodeScanActivity;
 import app.photocapture.com.setting_activity.SettingActivity;
 import app.photocapture.com.util.Constants;
+import app.photocapture.com.util.GlideUtils;
 import app.photocapture.com.util.PermissionUtils;
 import app.photocapture.com.util.SharedPrefUtils;
 
@@ -26,14 +48,26 @@ public class PhotoCaptureActivity extends AppCompatActivity
     PhotoCapturePresenter photoCapturePresenter;
     EditText edtReferenceNumber;
     ImageButton btnSetting;
-    CardView cardViewQrCode;
+    AppCompatButton btnViewPhotos;
+    CardView cardViewQrCode,
+            cardViewNewFolder,
+            cardCaptureImage,
+            cardCaptureVideo;
     boolean isGranted = true;
+    String pictureImagePath;
+    File pickedImageFile = null;
+    String videoPath;
+    boolean isImageRequest = false;
+    File pickedVideoFile = null;
+    private final int REQUEST_CAMERA = 1;
+    private final int REQUEST_VIDEO = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_photo_capture);
-        photoCapturePresenter = new PhotoCapturePresenter(this);
+        photoCapturePresenter = new PhotoCapturePresenter(this,
+                this);
         initViews();
         setListener();
         askPermission();
@@ -65,12 +99,65 @@ public class PhotoCaptureActivity extends AppCompatActivity
         }
     }
 
+    private void startCameraForImage(String s) {
+        photoCapturePresenter.checkIfFolderExists(s);
+    }
+
+    private void startCameraForVideo(String s) {
+        photoCapturePresenter.checkIfFolderExists(s);
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK) {
+            if (requestCode == REQUEST_CAMERA) {
+                pickedImageFile = new File(pictureImagePath);
+                if (pickedImageFile.exists()) {
+                    if (SharedPrefUtils.INSTANCE.readPreViewImageStatus(
+                            Constants.PreferenceKeys.IS_PREVIEW_IMAGE_ON
+                    )) {
+                        showImageViewerDialog(pickedImageFile);
+                    } else {
+                        Toast.makeText(this, getResources()
+                                .getString(R.string.saved_successfully),
+                                Toast.LENGTH_SHORT).show();
+                    }
+
+                }
+            } else if (requestCode == REQUEST_VIDEO) {
+                pickedVideoFile = new File(videoPath);
+                if (pickedVideoFile.exists()) {
+                    if (SharedPrefUtils.INSTANCE.readPreViewImageStatus(
+                            Constants.PreferenceKeys.IS_PREVIEW_IMAGE_ON
+                    )) {
+                        showVideoPreviewDialog(pickedVideoFile);
+                    } else {
+                        Toast.makeText(this, getResources()
+                                .getString(R.string.saved_successfully),
+                                Toast.LENGTH_SHORT).show();
+                    }
+
+                }
+            }
+        }
+    }
+
     private void setListener() {
+        cardViewNewFolder.setOnClickListener(this);
         btnSetting.setOnClickListener(this);
         cardViewQrCode.setOnClickListener(this);
+        btnViewPhotos.setOnClickListener(this);
+        cardCaptureImage.setOnClickListener(this);
+        cardCaptureVideo.setOnClickListener(this);
     }
 
     private void initViews() {
+        cardCaptureVideo = findViewById(R.id.card_view_capture_video);
+        cardCaptureImage = findViewById(R.id.card_view_capture_photo);
+        cardViewNewFolder = findViewById(R.id.card_view_new_folder);
+        btnViewPhotos = findViewById(R.id.btn_view_photos);
         cardViewQrCode = findViewById(R.id.card_view_qr_code);
         edtReferenceNumber = findViewById(R.id.edit_text_reference);
         btnSetting = findViewById(R.id.btn_setting);
@@ -93,11 +180,63 @@ public class PhotoCaptureActivity extends AppCompatActivity
         }
     }
 
+    public void saveImage(String folderName) {
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+        StrictMode.setVmPolicy(builder.build());
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = timeStamp + ".jpg";
+        File storageDir = new File(Environment.getExternalStorageDirectory() + File.separator +
+                Constants.File.ROOT_FOLDER_NAME + File.separator + folderName);
+        pictureImagePath = storageDir.getAbsolutePath() + "/" + imageFileName;
+        File file = new File(pictureImagePath);
+        Uri outputFileUri = Uri.fromFile(file);
+        Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, outputFileUri);
+        startActivityForResult(cameraIntent, REQUEST_CAMERA);
+    }
+
+    public void saveVideo(String folderName) {
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+        StrictMode.setVmPolicy(builder.build());
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = timeStamp + ".mp4";
+        File storageDir = new File(Environment.getExternalStorageDirectory() + File.separator +
+                Constants.File.ROOT_FOLDER_NAME + File.separator + folderName);
+        videoPath = storageDir.getAbsolutePath() + "/" + imageFileName;
+        File file = new File(videoPath);
+        Uri outputFileUri = Uri.fromFile(file);
+        Intent cameraIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, outputFileUri);
+        startActivityForResult(cameraIntent, REQUEST_VIDEO);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
+            case R.id.card_view_capture_video:
+                if(isGranted){
+                    isImageRequest = false;
+                    startCameraForVideo(edtReferenceNumber.getText().toString());
+                }else{
+                    askPermission();
+                }
+                break;
+
+            case R.id.card_view_capture_photo:
+                if(isGranted){
+                    isImageRequest = true;
+                    startCameraForImage(edtReferenceNumber.getText().toString());
+                }else {
+                    askPermission();
+                }
+                break;
+
+            case R.id.btn_view_photos:
+                photoCapturePresenter.openRootFolder(this);
+                break;
+
             case R.id.btn_setting:
-                photoCapturePresenter.createSubFolder("Hello");
                 startActivity(
                         new Intent(
                                 PhotoCaptureActivity.this,
@@ -106,7 +245,6 @@ public class PhotoCaptureActivity extends AppCompatActivity
                 );
                 break;
             case R.id.card_view_qr_code:
-                photoCapturePresenter.checkIfFolderExists("Hello");
                 if (isGranted) {
                     startActivity(
                             new Intent(
@@ -121,6 +259,15 @@ public class PhotoCaptureActivity extends AppCompatActivity
                             Toast.LENGTH_SHORT).show();
                 }
                 break;
+
+            case R.id.card_view_new_folder:
+                InputMethodManager inputMethodManager =
+                        (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputMethodManager.toggleSoftInputFromWindow(
+                        edtReferenceNumber.getApplicationWindowToken(),
+                        InputMethodManager.SHOW_FORCED, InputMethodManager.SHOW_FORCED);
+                edtReferenceNumber.setText("");
+                break;
         }
     }
 
@@ -129,29 +276,13 @@ public class PhotoCaptureActivity extends AppCompatActivity
     }
 
     @Override
-    public void onImageSaveSuccess(String message) {
-
-    }
-
-    @Override
-    public void onImageSaveError(String message) {
-
-    }
-
-    @Override
-    public void onVideoSaveSuccess(String message) {
-
-    }
-
-    @Override
-    public void onVideoSaveError(String message) {
-
-    }
-
-    @Override
     public void onFolderFound() {
-        photoCapturePresenter.saveImage();
-        photoCapturePresenter.saveVideo();
+        if (isImageRequest) {
+            saveImage(edtReferenceNumber.getText().toString());
+        } else {
+            saveVideo(edtReferenceNumber.getText().toString());
+        }
+
     }
 
     @Override
@@ -161,11 +292,96 @@ public class PhotoCaptureActivity extends AppCompatActivity
 
     @Override
     public void onFolderCreateSuccess() {
-
+        if (isImageRequest) {
+            saveImage(edtReferenceNumber.getText().toString());
+        } else {
+            saveVideo(edtReferenceNumber.getText().toString());
+        }
     }
 
     @Override
     public void onFolderCreateError() {
+        Toast.makeText(this, getResources().
+                        getString(R.string.something_went_wrong),
+                Toast.LENGTH_SHORT).show();
+    }
 
+    private void showImageViewerDialog(final File imageFile) {
+        final Dialog dialog = new Dialog(this,
+                android.R.style.Theme_Light_NoTitleBar_Fullscreen);
+        dialog.setContentView(R.layout.layout_photo_viewer_dialog);
+        ImageView imageViewPickedImage = dialog.findViewById(R.id.image_view_show);
+        Button btnDiscard = dialog.findViewById(R.id.btn_discard);
+        Button btnSave = dialog.findViewById(R.id.btn_save);
+        btnDiscard.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (imageFile.exists()) {
+                    if (imageFile.delete()) {
+                        dialog.dismiss();
+                    } else {
+                        Toast.makeText(PhotoCaptureActivity.this,
+                                getResources().getString(
+                                        R.string.something_went_wrong
+                                ),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+        });
+        btnSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(PhotoCaptureActivity.this, getResources()
+                                .getString(R.string.saved_successfully),
+                        Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+            }
+        });
+        GlideUtils.Companion.normal(
+                imageViewPickedImage,
+                imageFile
+        );
+        dialog.show();
+    }
+
+    private void showVideoPreviewDialog(final File videoFile) {
+        final Dialog dialog = new Dialog(this,
+                android.R.style.Theme_Light_NoTitleBar_Fullscreen);
+        dialog.setContentView(R.layout.layout_video_viewer_dialog);
+        VideoView videoViewCapturePreview = dialog.findViewById(R.id.video_view_capture);
+        Button btnDiscard = dialog.findViewById(R.id.btn_discard);
+        Button btnSave = dialog.findViewById(R.id.btn_save);
+        btnDiscard.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (videoFile.exists()) {
+                    if (videoFile.delete()) {
+                        dialog.dismiss();
+                    } else {
+                        Toast.makeText(PhotoCaptureActivity.this,
+                                getResources().getString(
+                                        R.string.something_went_wrong
+                                ),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+        });
+        btnSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(PhotoCaptureActivity.this, getResources()
+                                .getString(R.string.saved_successfully),
+                        Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+            }
+        });
+        videoViewCapturePreview.setVideoURI(Uri.parse(videoFile.getPath()));
+        videoViewCapturePreview.setMediaController(new MediaController(this));
+        videoViewCapturePreview.requestFocus();
+        videoViewCapturePreview.start();
+        dialog.show();
     }
 }
+

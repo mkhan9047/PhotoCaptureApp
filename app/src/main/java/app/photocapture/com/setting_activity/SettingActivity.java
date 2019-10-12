@@ -55,6 +55,7 @@ public class SettingActivity extends AppCompatActivity implements
     protected void onResume() {
         super.onResume();
         showSavedInputType();
+        showSavedPreviewOption();
     }
 
     private void setPreViewImageState(boolean state) {
@@ -64,6 +65,7 @@ public class SettingActivity extends AppCompatActivity implements
         );
     }
 
+
     private void showSavedInputType() {
         if (SharedPrefUtils.INSTANCE.readInputType(
                 Constants.PreferenceKeys.REFERENCE_NUMBER_INPUT_TYPE
@@ -72,7 +74,13 @@ public class SettingActivity extends AppCompatActivity implements
         } else {
             inputTypeRadioGroup.check(R.id.radio_alpha_numric);
         }
+    }
 
+    private void showSavedPreviewOption() {
+        aSwitchPreviewImage.setChecked(
+                SharedPrefUtils.INSTANCE.readPreViewImageStatus(
+                Constants.PreferenceKeys.IS_PREVIEW_IMAGE_ON
+        ));
     }
 
     @Override

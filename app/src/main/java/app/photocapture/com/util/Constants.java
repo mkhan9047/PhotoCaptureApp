@@ -8,11 +8,15 @@ public class Constants {
         public static final Integer DEFAULT_INTEGER = 0;
         public static final Integer INPUT_TYPE_DEFAULT = InputType.TYPE_CLASS_NUMBER;
         public static final Long DEFAULT_LONG = 0L;
-        public static final Boolean DEFAULT_BOOLEAN = false;
+        public static final Boolean DEFAULT_BOOLEAN = true;
     }
 
     public static class IntentKeys{
         public static final String QR_RESULT = "qr-result";
+    }
+
+    public static class File{
+        public static final String ROOT_FOLDER_NAME = "PhotoCaptureApp";
     }
 
     public static class PreferenceKeys {

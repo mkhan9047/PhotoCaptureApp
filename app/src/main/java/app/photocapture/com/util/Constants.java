@@ -15,6 +15,10 @@ public class Constants {
         public static final String QR_RESULT = "qr-result";
     }
 
+    public static class File{
+        public static final String ROOT_FOLDER_NAME = "PhotoCaptureApp";
+    }
+
     public static class PreferenceKeys {
         public static final String IS_PREVIEW_IMAGE_ON = "preview-image";
         public static final String REFERENCE_NUMBER_INPUT_TYPE = "reference-number";

@@ -8,7 +8,6 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.text.InputType;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -22,8 +21,9 @@ import app.photocapture.com.util.PermissionUtils;
 import app.photocapture.com.util.SharedPrefUtils;
 
 public class PhotoCaptureActivity extends AppCompatActivity
-        implements View.OnClickListener {
+        implements View.OnClickListener, PhotoCaptureMvpView {
 
+    PhotoCapturePresenter photoCapturePresenter;
     EditText edtReferenceNumber;
     ImageButton btnSetting;
     CardView cardViewQrCode;
@@ -33,10 +33,12 @@ public class PhotoCaptureActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_photo_capture);
+        photoCapturePresenter = new PhotoCapturePresenter(this);
         initViews();
         setListener();
         askPermission();
         searchForExtra();
+        createInitialFolder();
     }
 
     @Override
@@ -95,6 +97,7 @@ public class PhotoCaptureActivity extends AppCompatActivity
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_setting:
+                photoCapturePresenter.createSubFolder("Hello");
                 startActivity(
                         new Intent(
                                 PhotoCaptureActivity.this,
@@ -103,6 +106,7 @@ public class PhotoCaptureActivity extends AppCompatActivity
                 );
                 break;
             case R.id.card_view_qr_code:
+                photoCapturePresenter.checkIfFolderExists("Hello");
                 if (isGranted) {
                     startActivity(
                             new Intent(
@@ -118,5 +122,50 @@ public class PhotoCaptureActivity extends AppCompatActivity
                 }
                 break;
         }
+    }
+
+    private void createInitialFolder() {
+        photoCapturePresenter.createRootFolder();
+    }
+
+    @Override
+    public void onImageSaveSuccess(String message) {
+
+    }
+
+    @Override
+    public void onImageSaveError(String message) {
+
+    }
+
+    @Override
+    public void onVideoSaveSuccess(String message) {
+
+    }
+
+    @Override
+    public void onVideoSaveError(String message) {
+
+    }
+
+    @Override
+    public void onFolderFound() {
+        photoCapturePresenter.saveImage();
+        photoCapturePresenter.saveVideo();
+    }
+
+    @Override
+    public void onFolderNotFound() {
+        photoCapturePresenter.createSubFolder(edtReferenceNumber.getText().toString());
+    }
+
+    @Override
+    public void onFolderCreateSuccess() {
+
+    }
+
+    @Override
+    public void onFolderCreateError() {
+
     }
 }

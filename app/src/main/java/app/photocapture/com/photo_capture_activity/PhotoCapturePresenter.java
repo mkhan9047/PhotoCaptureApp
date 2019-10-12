@@ -1,4 +1,4 @@
-package app.photocapture.com.PhotoCaptureActivity;
+package app.photocapture.com.photo_capture_activity;
 
 public class PhotoCapturePresenter {
     private void createFolder() {

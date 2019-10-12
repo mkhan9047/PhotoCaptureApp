@@ -11,8 +11,12 @@ public class Constants {
         public static final Boolean DEFAULT_BOOLEAN = false;
     }
 
+    public static class IntentKeys{
+        public static final String QR_RESULT = "qr-result";
+    }
+
     public static class PreferenceKeys {
-        public static final String IS_PREVIEW_IMAGE_ON = "";
-        public static final String REFERENCE_NUMBER_INPUT_TYPE = "";
+        public static final String IS_PREVIEW_IMAGE_ON = "preview-image";
+        public static final String REFERENCE_NUMBER_INPUT_TYPE = "reference-number";
     }
 }

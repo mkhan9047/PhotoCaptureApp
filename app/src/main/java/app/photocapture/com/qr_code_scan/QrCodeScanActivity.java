@@ -2,12 +2,15 @@ package app.photocapture.com.qr_code_scan;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 
 import com.google.zxing.Result;
 
 import app.photocapture.com.R;
+import app.photocapture.com.photo_capture_activity.PhotoCaptureActivity;
+import app.photocapture.com.util.Constants;
 import me.dm7.barcodescanner.zxing.ZXingScannerView;
 
 public class QrCodeScanActivity extends AppCompatActivity implements
@@ -20,6 +23,7 @@ public class QrCodeScanActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         zXingScannerView = new ZXingScannerView(this);
         setContentView(zXingScannerView);
+        zXingScannerView.setAutoFocus(true);
     }
 
     @Override
@@ -35,11 +39,31 @@ public class QrCodeScanActivity extends AppCompatActivity implements
         zXingScannerView.stopCamera();// Stop camera on pause
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        startActivity(
+                new Intent(
+                        this,
+                        PhotoCaptureActivity.class
+                )
+        );
+        finish();
+    }
 
     @Override
     public void handleResult(Result rawResult) {
         if (rawResult != null) {
-            Toast.makeText(this, rawResult.getText(), Toast.LENGTH_SHORT).show();
+            startActivity(
+                    new Intent(
+                            this,
+                            PhotoCaptureActivity.class
+                    ).putExtra(
+                            Constants.IntentKeys.QR_RESULT,
+                            rawResult.getText()
+                    )
+            );
+            finish();
         }
     }
 }

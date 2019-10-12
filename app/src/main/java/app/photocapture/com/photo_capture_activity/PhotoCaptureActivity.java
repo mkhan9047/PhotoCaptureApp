@@ -36,6 +36,7 @@ public class PhotoCaptureActivity extends AppCompatActivity
         initViews();
         setListener();
         askPermission();
+        searchForExtra();
     }
 
     @Override
@@ -51,6 +52,15 @@ public class PhotoCaptureActivity extends AppCompatActivity
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.CAMERA
         );
+    }
+
+    private void searchForExtra() {
+        if (getIntent() != null) {
+            String qrResult = getIntent().getStringExtra(
+                    Constants.IntentKeys.QR_RESULT
+            );
+            edtReferenceNumber.setText(qrResult);
+        }
     }
 
     private void setListener() {
@@ -71,7 +81,8 @@ public class PhotoCaptureActivity extends AppCompatActivity
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull
+            String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == PermissionUtils.REQUEST_CODE_PERMISSION_LOCATION_AND_STORAGE) {
             for (int i = 0; i < permissions.length; i++) {
@@ -99,10 +110,12 @@ public class PhotoCaptureActivity extends AppCompatActivity
                                     QrCodeScanActivity.class
                             )
                     );
+                    finish();
                 } else {
-                    Toast.makeText(this, getResources().getString(R.string.required_permission), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this,
+                            getResources().getString(R.string.required_permission),
+                            Toast.LENGTH_SHORT).show();
                 }
-
                 break;
         }
     }

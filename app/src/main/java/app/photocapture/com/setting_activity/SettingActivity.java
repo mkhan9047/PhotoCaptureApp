@@ -58,7 +58,7 @@ public class SettingActivity extends AppCompatActivity implements
     }
 
     private void setPreViewImageState(boolean state) {
-        SharedPrefUtils.INSTANCE.write(
+        SharedPrefUtils.INSTANCE.writePreviewImageStatus(
                 Constants.PreferenceKeys.IS_PREVIEW_IMAGE_ON,
                 state
         );

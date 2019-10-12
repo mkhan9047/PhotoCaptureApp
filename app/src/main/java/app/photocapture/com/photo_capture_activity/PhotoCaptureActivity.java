@@ -8,8 +8,10 @@ import androidx.appcompat.widget.AppCompatButton;
 import androidx.cardview.widget.CardView;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -48,7 +50,7 @@ public class PhotoCaptureActivity extends AppCompatActivity
     PhotoCapturePresenter photoCapturePresenter;
     EditText edtReferenceNumber;
     ImageButton btnSetting;
-    AppCompatButton btnViewPhotos;
+    AppCompatButton btnViewPhotos, btnExitApp;
     CardView cardViewQrCode,
             cardViewNewFolder,
             cardCaptureImage,
@@ -151,6 +153,7 @@ public class PhotoCaptureActivity extends AppCompatActivity
         btnViewPhotos.setOnClickListener(this);
         cardCaptureImage.setOnClickListener(this);
         cardCaptureVideo.setOnClickListener(this);
+        btnExitApp.setOnClickListener(this);
     }
 
     private void initViews() {
@@ -161,6 +164,7 @@ public class PhotoCaptureActivity extends AppCompatActivity
         cardViewQrCode = findViewById(R.id.card_view_qr_code);
         edtReferenceNumber = findViewById(R.id.edit_text_reference);
         btnSetting = findViewById(R.id.btn_setting);
+        btnExitApp = findViewById(R.id.btn_exit);
     }
 
     private void setUpViewOption() {
@@ -184,7 +188,7 @@ public class PhotoCaptureActivity extends AppCompatActivity
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = timeStamp + ".jpg";
+        String imageFileName = edtReferenceNumber.getText().toString() + "_" + timeStamp + ".jpg";
         File storageDir = new File(Environment.getExternalStorageDirectory() + File.separator +
                 Constants.File.ROOT_FOLDER_NAME + File.separator + folderName);
         pictureImagePath = storageDir.getAbsolutePath() + "/" + imageFileName;
@@ -199,7 +203,7 @@ public class PhotoCaptureActivity extends AppCompatActivity
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = timeStamp + ".mp4";
+        String imageFileName = edtReferenceNumber.getText().toString() + "_" + timeStamp + ".mp4";
         File storageDir = new File(Environment.getExternalStorageDirectory() + File.separator +
                 Constants.File.ROOT_FOLDER_NAME + File.separator + folderName);
         videoPath = storageDir.getAbsolutePath() + "/" + imageFileName;
@@ -245,7 +249,7 @@ public class PhotoCaptureActivity extends AppCompatActivity
                 break;
 
             case R.id.btn_view_photos:
-                photoCapturePresenter.openRootFolder(this);
+                Toast.makeText(this, "Under construction!", Toast.LENGTH_SHORT).show();
                 break;
 
             case R.id.btn_setting:
@@ -266,10 +270,32 @@ public class PhotoCaptureActivity extends AppCompatActivity
                     );
                     finish();
                 } else {
+                    askPermission();
                     Toast.makeText(this,
                             getResources().getString(R.string.required_permission),
                             Toast.LENGTH_SHORT).show();
                 }
+                break;
+
+            case R.id.btn_exit:
+                AlertDialog.Builder exitDialog = new AlertDialog.Builder(
+                        this
+                ).setMessage("Do you wants to exit?")
+                        .setTitle("Exit")
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                finish();
+                            }
+                        })
+                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                exitDialog.show();
                 break;
 
             case R.id.card_view_new_folder:
@@ -339,6 +365,7 @@ public class PhotoCaptureActivity extends AppCompatActivity
                                 Toast.LENGTH_SHORT).show();
                     }
                 }
+                cardCaptureImage.performClick();
             }
         });
         btnSave.setOnClickListener(new View.OnClickListener() {
@@ -348,6 +375,7 @@ public class PhotoCaptureActivity extends AppCompatActivity
                                 .getString(R.string.saved_successfully),
                         Toast.LENGTH_SHORT).show();
                 dialog.dismiss();
+                cardCaptureImage.performClick();
             }
         });
         GlideUtils.Companion.normal(
@@ -377,7 +405,9 @@ public class PhotoCaptureActivity extends AppCompatActivity
                                 ),
                                 Toast.LENGTH_SHORT).show();
                     }
+                    cardCaptureVideo.performClick();
                 }
+
             }
         });
         btnSave.setOnClickListener(new View.OnClickListener() {
@@ -387,6 +417,8 @@ public class PhotoCaptureActivity extends AppCompatActivity
                                 .getString(R.string.saved_successfully),
                         Toast.LENGTH_SHORT).show();
                 dialog.dismiss();
+                cardCaptureVideo.performClick();
+
             }
         });
         videoViewCapturePreview.setVideoURI(Uri.parse(videoFile.getPath()));

@@ -79,8 +79,8 @@ public class SettingActivity extends AppCompatActivity implements
     private void showSavedPreviewOption() {
         aSwitchPreviewImage.setChecked(
                 SharedPrefUtils.INSTANCE.readPreViewImageStatus(
-                        Constants.PreferenceKeys.IS_PREVIEW_IMAGE_ON
-                ));
+                Constants.PreferenceKeys.IS_PREVIEW_IMAGE_ON
+        ));
     }
 
     @Override

@@ -4,4 +4,6 @@
     <string name="exit_app">Exit App</string>
     <string name="sync_data">Sync Data</string>
     <string name="view_photos">View Photos</string>
+    <string name="txt_setting">Setting</string>
+    <string name="required_permission">Please give the required permissions!</string>
 </resources>

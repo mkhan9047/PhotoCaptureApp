@@ -17,7 +17,6 @@
         android:background="@drawable/input_box_background"
         android:gravity="center"
         android:hint="@string/reference_number"
-        android:inputType="text"
         android:padding="12dp"
         android:textSize="14sp"
         app:layout_constraintEnd_toStartOf="@id/btn_setting"

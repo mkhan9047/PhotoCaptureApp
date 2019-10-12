@@ -121,7 +121,7 @@ public class PhotoCaptureActivity extends AppCompatActivity
                         showImageViewerDialog(pickedImageFile);
                     } else {
                         Toast.makeText(this, getResources()
-                                .getString(R.string.saved_successfully),
+                                        .getString(R.string.saved_successfully),
                                 Toast.LENGTH_SHORT).show();
                     }
 
@@ -135,7 +135,7 @@ public class PhotoCaptureActivity extends AppCompatActivity
                         showVideoPreviewDialog(pickedVideoFile);
                     } else {
                         Toast.makeText(this, getResources()
-                                .getString(R.string.saved_successfully),
+                                        .getString(R.string.saved_successfully),
                                 Toast.LENGTH_SHORT).show();
                     }
 
@@ -215,20 +215,32 @@ public class PhotoCaptureActivity extends AppCompatActivity
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.card_view_capture_video:
-                if(isGranted){
-                    isImageRequest = false;
-                    startCameraForVideo(edtReferenceNumber.getText().toString());
-                }else{
-                    askPermission();
+                if (edtReferenceNumber.getText().toString().length() != 0) {
+                    if (isGranted) {
+                        isImageRequest = false;
+                        startCameraForVideo(edtReferenceNumber.getText().toString());
+                    } else {
+                        askPermission();
+                    }
+                } else {
+                    Toast.makeText(this, getResources()
+                                    .getString(R.string.empty_reference),
+                            Toast.LENGTH_SHORT).show();
                 }
                 break;
 
             case R.id.card_view_capture_photo:
-                if(isGranted){
-                    isImageRequest = true;
-                    startCameraForImage(edtReferenceNumber.getText().toString());
-                }else {
-                    askPermission();
+                if (edtReferenceNumber.getText().toString().length() != 0) {
+                    if (isGranted) {
+                        isImageRequest = true;
+                        startCameraForImage(edtReferenceNumber.getText().toString());
+                    } else {
+                        askPermission();
+                    }
+                } else {
+                    Toast.makeText(this, getResources()
+                                    .getString(R.string.empty_reference),
+                            Toast.LENGTH_SHORT).show();
                 }
                 break;
 
@@ -266,6 +278,7 @@ public class PhotoCaptureActivity extends AppCompatActivity
                 inputMethodManager.toggleSoftInputFromWindow(
                         edtReferenceNumber.getApplicationWindowToken(),
                         InputMethodManager.SHOW_FORCED, InputMethodManager.SHOW_FORCED);
+                edtReferenceNumber.requestFocus();
                 edtReferenceNumber.setText("");
                 break;
         }
@@ -282,7 +295,6 @@ public class PhotoCaptureActivity extends AppCompatActivity
         } else {
             saveVideo(edtReferenceNumber.getText().toString());
         }
-
     }
 
     @Override
@@ -383,5 +395,6 @@ public class PhotoCaptureActivity extends AppCompatActivity
         videoViewCapturePreview.start();
         dialog.show();
     }
+
 }
 

@@ -32,6 +32,8 @@ import android.widget.MediaController;
 import android.widget.Toast;
 import android.widget.VideoView;
 
+import com.bugsnag.android.Bugsnag;
+
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;

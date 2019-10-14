@@ -21,10 +21,19 @@
         <activity
             android:name=".qr_code_scan.QrCodeScanActivity"
             android:launchMode="singleTop" />
+
+        <meta-data
+            android:name="com.bugsnag.android.API_KEY"
+            android:value="adee9284a2c8740fe247725e1a8d2284"/>
+
+        <meta-data android:name="com.bugsnag.android.DETECT_ANRS"
+            android:value="true"/>
+
         <activity
             android:name=".setting_activity.SettingActivity"
             android:launchMode="singleTop"
             android:parentActivityName=".photo_capture_activity.PhotoCaptureActivity" />
+
         <activity
             android:name=".photo_capture_activity.PhotoCaptureActivity"
             android:launchMode="singleTop">
@@ -34,6 +43,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
     </application>
 
 </manifest>

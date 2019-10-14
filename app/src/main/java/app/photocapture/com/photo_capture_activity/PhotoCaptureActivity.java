@@ -122,6 +122,7 @@ public class PhotoCaptureActivity extends AppCompatActivity
                     )) {
                         showImageViewerDialog(pickedImageFile);
                     } else {
+                        cardCaptureImage.performClick();
                         Toast.makeText(this, getResources()
                                         .getString(R.string.saved_successfully),
                                 Toast.LENGTH_SHORT).show();
@@ -136,6 +137,7 @@ public class PhotoCaptureActivity extends AppCompatActivity
                     )) {
                         showVideoPreviewDialog(pickedVideoFile);
                     } else {
+                        cardCaptureVideo.performClick();
                         Toast.makeText(this, getResources()
                                         .getString(R.string.saved_successfully),
                                 Toast.LENGTH_SHORT).show();

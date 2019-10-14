@@ -6,6 +6,7 @@ import androidx.multidex.BuildConfig
 import androidx.multidex.MultiDex
 import androidx.multidex.MultiDexApplication
 import app.photocapture.com.util.SharedPrefUtils
+import com.bugsnag.android.Bugsnag
 
 
 /**
@@ -34,6 +35,7 @@ class BaseApplication : MultiDexApplication() {
 
     override fun onCreate() {
         super.onCreate()
+        Bugsnag.init(this)
         // DataUtils.getAndroidHashKey()
     }
 

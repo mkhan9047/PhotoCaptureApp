@@ -32,6 +32,8 @@ import android.widget.MediaController;
 import android.widget.Toast;
 import android.widget.VideoView;
 
+import com.bugsnag.android.Bugsnag;
+
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -122,6 +124,7 @@ public class PhotoCaptureActivity extends AppCompatActivity
                     )) {
                         showImageViewerDialog(pickedImageFile);
                     } else {
+                        cardCaptureImage.performClick();
                         Toast.makeText(this, getResources()
                                         .getString(R.string.saved_successfully),
                                 Toast.LENGTH_SHORT).show();
@@ -136,6 +139,7 @@ public class PhotoCaptureActivity extends AppCompatActivity
                     )) {
                         showVideoPreviewDialog(pickedVideoFile);
                     } else {
+                        cardCaptureVideo.performClick();
                         Toast.makeText(this, getResources()
                                         .getString(R.string.saved_successfully),
                                 Toast.LENGTH_SHORT).show();

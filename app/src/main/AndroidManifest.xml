@@ -6,44 +6,48 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-feature android:name="android.hardware.camera" android:required="false"/>
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
 
     <application
         android:name="app.photocapture.BaseApplication"
         android:allowBackup="true"
+        android:hardwareAccelerated="true"
         android:icon="@mipmap/camera"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/camera"
         android:supportsRtl="true"
-        android:hardwareAccelerated="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+        <activity android:name=".splash.SplashActivity"
+            android:theme="@style/AppTheme.GradientStatusBar"
+            >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".qr_code_scan.QrCodeScanActivity"
             android:launchMode="singleTop" />
 
         <meta-data
             android:name="com.bugsnag.android.API_KEY"
-            android:value="adee9284a2c8740fe247725e1a8d2284"/>
-
-        <meta-data android:name="com.bugsnag.android.DETECT_ANRS"
-            android:value="true"/>
+            android:value="adee9284a2c8740fe247725e1a8d2284" />
+        <meta-data
+            android:name="com.bugsnag.android.DETECT_ANRS"
+            android:value="true" />
 
         <activity
             android:name=".setting_activity.SettingActivity"
             android:launchMode="singleTop"
             android:parentActivityName=".photo_capture_activity.PhotoCaptureActivity" />
-
         <activity
             android:name=".photo_capture_activity.PhotoCaptureActivity"
             android:launchMode="singleTop">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
-
     </application>
 
 </manifest>

@@ -48,6 +48,7 @@
             android:name=".photo_capture_activity.PhotoCaptureActivity"
             android:launchMode="singleTop">
         </activity>
+
     </application>
 
 </manifest>

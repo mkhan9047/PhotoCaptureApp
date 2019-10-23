@@ -9,5 +9,10 @@
     <string name="something_went_wrong">Something went wrong!</string>
     <string name="saved_successfully">Saved successfully!</string>
     <string name="empty_reference">Reference can\'t be empty!</string>
+    <string-array name="quality_text">
+        <item>High</item>
+        <item>Medium</item>
+        <item>Low</item>
+    </string-array>
     <string name="contact_splash">For suggestion and feedback \nplease contact: <font color="#988490">muazzam.sayeed@gmail.com</font></string>
 </resources>

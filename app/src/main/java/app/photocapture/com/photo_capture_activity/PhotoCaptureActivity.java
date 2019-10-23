@@ -22,6 +22,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.StrictMode;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
@@ -36,7 +37,12 @@ import android.widget.VideoView;
 import com.bugsnag.android.Bugsnag;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -62,6 +68,7 @@ public class PhotoCaptureActivity extends AppCompatActivity
             cardCaptureVideo;
     boolean isGranted = true;
     String pictureImagePath;
+    File compressedFile = null;
     File pickedImageFile = null;
     String videoPath;
     boolean isImageRequest = false;
@@ -121,27 +128,24 @@ public class PhotoCaptureActivity extends AppCompatActivity
         if (resultCode == RESULT_OK) {
             if (requestCode == REQUEST_CAMERA) {
                 pickedImageFile = new File(pictureImagePath);
-                pickedImageFile = Util.getCompressedFile(pickedImageFile, pictureImagePath,
+                compressedFile = Util.getCompressedFile(pickedImageFile,
                         PhotoCaptureActivity.this);
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if(pickedImageFile!=null)
-                        if (pickedImageFile.exists()) {
-                            if (SharedPrefUtils.INSTANCE.readPreViewImageStatus(
-                                    Constants.PreferenceKeys.IS_PREVIEW_IMAGE_ON
-                            )) {
-                                showImageViewerDialog(pickedImageFile);
-                            } else {
-                                cardCaptureImage.performClick();
-                                Toast.makeText(PhotoCaptureActivity.this, getResources()
-                                                .getString(R.string.saved_successfully),
-                                        Toast.LENGTH_SHORT).show();
-                            }
-
+                if (compressedFile != null && pickedImageFile != null) {
+                    overrideFile(compressedFile, pickedImageFile);
+                }
+                if (pickedImageFile != null)
+                    if (pickedImageFile.exists()) {
+                        if (SharedPrefUtils.INSTANCE.readPreViewImageStatus(
+                                Constants.PreferenceKeys.IS_PREVIEW_IMAGE_ON
+                        )) {
+                            showImageViewerDialog(compressedFile);
+                        } else {
+                            cardCaptureImage.performClick();
+                            Toast.makeText(PhotoCaptureActivity.this, getResources()
+                                            .getString(R.string.saved_successfully),
+                                    Toast.LENGTH_SHORT).show();
                         }
                     }
-                }, 1000);
 
             } else if (requestCode == REQUEST_VIDEO) {
                 pickedVideoFile = new File(videoPath);
@@ -174,6 +178,47 @@ public class PhotoCaptureActivity extends AppCompatActivity
         cardCaptureImage.setOnClickListener(this);
         cardCaptureVideo.setOnClickListener(this);
         btnExitApp.setOnClickListener(this);
+    }
+
+    private void overrideFile(File source, File destination) {
+        InputStream in = null;
+        try {
+            in = new FileInputStream(source);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        OutputStream out = null;
+        try {
+            out = new FileOutputStream(destination);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        // Copy the bits from instream to outstream
+        byte[] buf = new byte[1024];
+        int len = 0;
+        while (true) {
+            try {
+                if (!((len = in.read(buf)) > 0)) break;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                out.write(buf, 0, len);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        try {
+            in.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            out.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void initViews() {

@@ -19,7 +19,8 @@ public class Util {
         return Math.round(Resources.getSystem().getDisplayMetrics().density * dp);
     }
 
-    public static File getCompressedFile(File file,String path, Context context) {
+    public static File getCompressedFile(File file,
+                                         Context context) {
         File compressedFile = null;
         try {
             if (SharedPrefUtils.INSTANCE.readBoolean(
@@ -29,7 +30,6 @@ public class Util {
                         .setQuality(SharedPrefUtils.INSTANCE.readInt(
                                 Constants.PreferenceKeys.QUALITY_PERCENTENGE
                         ))
-                        .setDestinationDirectoryPath(path)
                         .compressToFile(file);
             } else {
                 switch (SharedPrefUtils.INSTANCE.readInt(

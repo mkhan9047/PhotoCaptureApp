@@ -19,6 +19,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.view.View;
@@ -35,6 +36,7 @@ import android.widget.VideoView;
 import com.bugsnag.android.Bugsnag;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -45,6 +47,7 @@ import app.photocapture.com.util.Constants;
 import app.photocapture.com.util.GlideUtils;
 import app.photocapture.com.util.PermissionUtils;
 import app.photocapture.com.util.SharedPrefUtils;
+import app.photocapture.com.util.Util;
 
 public class PhotoCaptureActivity extends AppCompatActivity
         implements View.OnClickListener, PhotoCaptureMvpView {
@@ -118,19 +121,28 @@ public class PhotoCaptureActivity extends AppCompatActivity
         if (resultCode == RESULT_OK) {
             if (requestCode == REQUEST_CAMERA) {
                 pickedImageFile = new File(pictureImagePath);
-                if (pickedImageFile.exists()) {
-                    if (SharedPrefUtils.INSTANCE.readPreViewImageStatus(
-                            Constants.PreferenceKeys.IS_PREVIEW_IMAGE_ON
-                    )) {
-                        showImageViewerDialog(pickedImageFile);
-                    } else {
-                        cardCaptureImage.performClick();
-                        Toast.makeText(this, getResources()
-                                        .getString(R.string.saved_successfully),
-                                Toast.LENGTH_SHORT).show();
-                    }
+                pickedImageFile = Util.getCompressedFile(pickedImageFile, pictureImagePath,
+                        PhotoCaptureActivity.this);
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(pickedImageFile!=null)
+                        if (pickedImageFile.exists()) {
+                            if (SharedPrefUtils.INSTANCE.readPreViewImageStatus(
+                                    Constants.PreferenceKeys.IS_PREVIEW_IMAGE_ON
+                            )) {
+                                showImageViewerDialog(pickedImageFile);
+                            } else {
+                                cardCaptureImage.performClick();
+                                Toast.makeText(PhotoCaptureActivity.this, getResources()
+                                                .getString(R.string.saved_successfully),
+                                        Toast.LENGTH_SHORT).show();
+                            }
 
-                }
+                        }
+                    }
+                }, 1000);
+
             } else if (requestCode == REQUEST_VIDEO) {
                 pickedVideoFile = new File(videoPath);
                 if (pickedVideoFile.exists()) {
@@ -149,6 +161,10 @@ public class PhotoCaptureActivity extends AppCompatActivity
             }
         }
     }
+
+ /*   private void doImageCompression(File file) {
+        Util.getCompressedFile(file,this);
+    }*/
 
     private void setListener() {
         cardViewNewFolder.setOnClickListener(this);
@@ -196,8 +212,8 @@ public class PhotoCaptureActivity extends AppCompatActivity
         File storageDir = new File(Environment.getExternalStorageDirectory() + File.separator +
                 Constants.File.ROOT_FOLDER_NAME + File.separator + folderName);
         pictureImagePath = storageDir.getAbsolutePath() + "/" + imageFileName;
-        File file = new File(pictureImagePath);
-        Uri outputFileUri = Uri.fromFile(file);
+        pickedImageFile = new File(pictureImagePath);
+        Uri outputFileUri = Uri.fromFile(pickedImageFile);
         Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, outputFileUri);
         startActivityForResult(cameraIntent, REQUEST_CAMERA);

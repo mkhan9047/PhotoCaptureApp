@@ -3,6 +3,7 @@ package app.photocapture.com.setting_activity;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.RadioGroup;
@@ -36,6 +37,41 @@ public class SettingActivity extends AppCompatActivity implements
         initViews();
         setUpToolbar();
         setListener();
+        setSavedValue();
+    }
+
+    private void setUpToolbar() {
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(getResources().getString(R.string.txt_setting));
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+    }
+
+    private void setSavedValue() {
+        //set saved value to seekbar
+        seekBarQuality.setProgress(SharedPrefUtils.INSTANCE.readInt(
+                Constants.PreferenceKeys.QUALITY_PERCENTENGE));
+        if (SharedPrefUtils.INSTANCE.readBoolean(Constants.PreferenceKeys.IMAGE_QUALITY_TYPE_IS_CUSTOM)) {
+            customImageQualityChecker.setChecked(true);
+        } else {
+            customImageQualityChecker.setChecked(false);
+        }
+        switch (SharedPrefUtils.INSTANCE.readInt(Constants.PreferenceKeys.QUALITY_SELECTED)) {
+            case Constants.ImageQuality.HIGH:
+                imageQualitySpinner.setSelection(0);
+                break;
+            case Constants.ImageQuality.LOW:
+                imageQualitySpinner.setSelection(2);
+                break;
+            case Constants.ImageQuality.MEDIUM:
+                imageQualitySpinner.setSelection(1);
+                break;
+        }
+    }
+
+    private void setListener() {
+        inputTypeRadioGroup.setOnCheckedChangeListener(this);
+        aSwitchPreviewImage.setOnCheckedChangeListener(this);
         customImageQualityChecker.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -52,19 +88,49 @@ public class SettingActivity extends AppCompatActivity implements
                 }
             }
         });
-    }
 
-    private void setUpToolbar() {
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle(getResources().getString(R.string.txt_setting));
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        seekBarQuality.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                SharedPrefUtils.INSTANCE.write(Constants.PreferenceKeys.QUALITY_PERCENTENGE,
+                        progress
+                );
+            }
 
-        }
-    }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
 
-    private void setListener() {
-        inputTypeRadioGroup.setOnCheckedChangeListener(this);
-        aSwitchPreviewImage.setOnCheckedChangeListener(this);
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+        imageQualitySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                switch (position) {
+                    case 0:
+                        SharedPrefUtils.INSTANCE.write(Constants.PreferenceKeys.QUALITY_SELECTED,
+                                Constants.ImageQuality.HIGH);
+                        break;
+                    case 1:
+                        SharedPrefUtils.INSTANCE.write(Constants.PreferenceKeys.QUALITY_SELECTED,
+                                Constants.ImageQuality.MEDIUM);
+                        break;
+                    case 2:
+                        SharedPrefUtils.INSTANCE.write(Constants.PreferenceKeys.QUALITY_SELECTED,
+                                Constants.ImageQuality.LOW);
+                        break;
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
     }
 
 

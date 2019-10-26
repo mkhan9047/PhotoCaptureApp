@@ -20,6 +20,7 @@
         android:roundIcon="@mipmap/camera"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
+        android:largeHeap="true"
         tools:ignore="GoogleAppIndexingWarning">
         <activity android:name=".splash.SplashActivity"
             android:theme="@style/AppTheme.GradientStatusBar"

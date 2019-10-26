@@ -462,6 +462,7 @@ public class PhotoCaptureActivity extends AppCompatActivity
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Util.putTimeStampOnImage(imageFile);
                 Toast.makeText(PhotoCaptureActivity.this, getResources()
                                 .getString(R.string.saved_successfully),
                         Toast.LENGTH_SHORT).show();

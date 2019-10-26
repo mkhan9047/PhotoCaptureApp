@@ -35,6 +35,7 @@ import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.bugsnag.android.Bugsnag;
+import com.theartofdev.edmodo.cropper.CropImage;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -126,49 +127,64 @@ public class PhotoCaptureActivity extends AppCompatActivity
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
-            if (requestCode == REQUEST_CAMERA) {
-                pickedImageFile = new File(pictureImagePath);
-                compressedFile = Util.getCompressedFile(pickedImageFile,
-                        PhotoCaptureActivity.this);
-                if (compressedFile != null && pickedImageFile != null) {
-                    overrideFile(compressedFile, pickedImageFile);
+            if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+                CropImage.ActivityResult result = CropImage.getActivityResult(data);
+                if (result != null) {
+                    Uri resultUri = result.getUri();
+                    File croppedImage = new File(resultUri.getPath());
+                    if (pickedImageFile != null) {
+                        overrideFile(croppedImage, pickedImageFile);
+                        Toast.makeText(this, "Saved Image!", Toast.LENGTH_SHORT).show();
+                    }
                 }
-                if (pickedImageFile != null)
-                    if (pickedImageFile.exists()) {
+            } else {
+                if (requestCode == REQUEST_CAMERA) {
+                    pickedImageFile = new File(pictureImagePath);
+                    compressedFile = Util.getCompressedFile(pickedImageFile,
+                            PhotoCaptureActivity.this);
+                    if (compressedFile != null && pickedImageFile != null) {
+                        overrideFile(compressedFile, pickedImageFile);
+                    }
+                    if (pickedImageFile != null)
+                        if (pickedImageFile.exists()) {
+                            if (SharedPrefUtils.INSTANCE.readPreViewImageStatus(
+                                    Constants.PreferenceKeys.IS_PREVIEW_IMAGE_ON
+                            )) {
+                                showImageViewerDialog(compressedFile);
+                            } else {
+                                cardCaptureImage.performClick();
+                                Toast.makeText(PhotoCaptureActivity.this, getResources()
+                                                .getString(R.string.saved_successfully),
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                } else if (requestCode == REQUEST_VIDEO) {
+                    pickedVideoFile = new File(videoPath);
+                    if (pickedVideoFile.exists()) {
                         if (SharedPrefUtils.INSTANCE.readPreViewImageStatus(
                                 Constants.PreferenceKeys.IS_PREVIEW_IMAGE_ON
                         )) {
-                            showImageViewerDialog(compressedFile);
+                            showVideoPreviewDialog(pickedVideoFile);
                         } else {
-                            cardCaptureImage.performClick();
-                            Toast.makeText(PhotoCaptureActivity.this, getResources()
+                            cardCaptureVideo.performClick();
+                            Toast.makeText(this, getResources()
                                             .getString(R.string.saved_successfully),
                                     Toast.LENGTH_SHORT).show();
                         }
-                    }
 
-            } else if (requestCode == REQUEST_VIDEO) {
-                pickedVideoFile = new File(videoPath);
-                if (pickedVideoFile.exists()) {
-                    if (SharedPrefUtils.INSTANCE.readPreViewImageStatus(
-                            Constants.PreferenceKeys.IS_PREVIEW_IMAGE_ON
-                    )) {
-                        showVideoPreviewDialog(pickedVideoFile);
-                    } else {
-                        cardCaptureVideo.performClick();
-                        Toast.makeText(this, getResources()
-                                        .getString(R.string.saved_successfully),
-                                Toast.LENGTH_SHORT).show();
                     }
-
                 }
             }
         }
     }
 
- /*   private void doImageCompression(File file) {
-        Util.getCompressedFile(file,this);
-    }*/
+
+    private void startImageCropping(File file) {
+        // start cropping activity for pre-acquired image saved on the device
+        CropImage.activity(Uri.fromFile(file))
+                .start(this);
+    }
 
     private void setListener() {
         cardViewNewFolder.setOnClickListener(this);
@@ -416,6 +432,16 @@ public class PhotoCaptureActivity extends AppCompatActivity
         ImageView imageViewPickedImage = dialog.findViewById(R.id.image_view_show);
         Button btnDiscard = dialog.findViewById(R.id.btn_discard);
         Button btnSave = dialog.findViewById(R.id.btn_save);
+        Button btnCrop = dialog.findViewById(R.id.btn_crop);
+        btnCrop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (imageFile.exists()) {
+                    startImageCropping(imageFile);
+                    dialog.dismiss();
+                }
+            }
+        });
         btnDiscard.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

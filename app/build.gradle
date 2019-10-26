@@ -37,6 +37,7 @@ dependencies {
     // Glide (Image loader)
     implementation 'com.github.bumptech.glide:glide:4.9.0'
     implementation 'me.dm7.barcodescanner:zxing:1.9.8'
+    api 'com.theartofdev.edmodo:android-image-cropper:2.8.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'com.bugsnag:bugsnag-android:4.+'
 }

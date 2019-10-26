@@ -8,6 +8,7 @@ import androidx.appcompat.widget.AppCompatButton;
 import androidx.cardview.widget.CardView;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -22,6 +23,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.StrictMode;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -48,9 +50,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import app.photocapture.com.R;
+import app.photocapture.com.database_helper.ImageInfoDAO;
 import app.photocapture.com.qr_code_scan.QrCodeScanActivity;
 import app.photocapture.com.setting_activity.SettingActivity;
 import app.photocapture.com.util.Constants;
+import app.photocapture.com.util.GPSTracker;
 import app.photocapture.com.util.GlideUtils;
 import app.photocapture.com.util.PermissionUtils;
 import app.photocapture.com.util.SharedPrefUtils;
@@ -63,6 +67,7 @@ public class PhotoCaptureActivity extends AppCompatActivity
     EditText edtReferenceNumber;
     ImageButton btnSetting;
     AppCompatButton btnViewPhotos, btnExitApp;
+    GPSTracker gpsTracker;
     CardView cardViewQrCode,
             cardViewNewFolder,
             cardCaptureImage,
@@ -88,6 +93,7 @@ public class PhotoCaptureActivity extends AppCompatActivity
         askPermission();
         searchForExtra();
         createInitialFolder();
+        gpsTracker = new GPSTracker(this);
     }
 
     @Override
@@ -101,6 +107,8 @@ public class PhotoCaptureActivity extends AppCompatActivity
                 PermissionUtils.REQUEST_CODE_PERMISSION_LOCATION_AND_STORAGE,
                 Manifest.permission.READ_EXTERNAL_STORAGE,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.CAMERA
         );
     }
@@ -125,6 +133,7 @@ public class PhotoCaptureActivity extends AppCompatActivity
     /*ExifInterface exif = new ExifInterface(filePhoto.getPath());
     String date=exif.getAttribute(ExifInterface.TAG_DATETIME);*/
 
+    @SuppressLint("HardwareIds")
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -145,9 +154,21 @@ public class PhotoCaptureActivity extends AppCompatActivity
                     pickedImageFile = new File(pictureImagePath);
                     compressedFile = Util.getCompressedFile(pickedImageFile,
                             PhotoCaptureActivity.this);
-                    Util.timestampItAndSave(pictureImagePath, compressedFile);
                     if (compressedFile != null && pickedImageFile != null) {
                         overrideFile(compressedFile, pickedImageFile);
+                        photoCapturePresenter.saveImageInfo(
+                                new ImageInfoDAO(compressedFile.getName(),
+                                        edtReferenceNumber.getText().toString(),
+                                        Util.getCurrentDateTime(),
+                                        String.valueOf(gpsTracker.getLatitude()),
+                                        String.valueOf(gpsTracker.getLongitude()),
+                                        Settings.Secure.getString(getContentResolver(),
+                                                Settings.Secure.ANDROID_ID) != null ?
+                                                Settings.Secure.getString(getContentResolver(),
+                                                        Settings.Secure.ANDROID_ID) : "Not Found!"
+                                ),
+                                this
+                        );
                     }
                     if (pickedImageFile != null)
                         if (pickedImageFile.exists()) {
@@ -427,6 +448,15 @@ public class PhotoCaptureActivity extends AppCompatActivity
         Toast.makeText(this, getResources().
                         getString(R.string.something_went_wrong),
                 Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onImageInfoSavedSuccess() {
+    }
+
+    @Override
+    public void onImageInfoSavedError(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
     private void showImageViewerDialog(final File imageFile) {

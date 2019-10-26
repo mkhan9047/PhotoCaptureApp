@@ -1,7 +1,9 @@
 package app.photocapture.com.photo_capture_activity;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -17,6 +19,8 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import app.photocapture.com.database_helper.DatabaseOperation;
+import app.photocapture.com.database_helper.ImageInfoDAO;
 import app.photocapture.com.util.Constants;
 
 class PhotoCapturePresenter {
@@ -74,6 +78,17 @@ class PhotoCapturePresenter {
                 + File.separator + Constants.File.ROOT_FOLDER_NAME);
         intent.setDataAndType(uri, "text/csv");
         activity.startActivity(intent);
+    }
+
+
+    void saveImageInfo(ImageInfoDAO imageInfoDAO, Context context) {
+        try {
+            DatabaseOperation.saveImageInfo(context, imageInfoDAO);
+            photoCaptureMvpView.onImageInfoSavedSuccess();
+        } catch (SQLiteException e) {
+            e.printStackTrace();
+            photoCaptureMvpView.onImageInfoSavedError(e.getMessage());
+        }
     }
 
 }

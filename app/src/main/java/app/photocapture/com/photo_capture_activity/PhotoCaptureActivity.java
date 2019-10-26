@@ -122,6 +122,8 @@ public class PhotoCaptureActivity extends AppCompatActivity
         photoCapturePresenter.checkIfFolderExists(s);
     }
 
+    /*ExifInterface exif = new ExifInterface(filePhoto.getPath());
+    String date=exif.getAttribute(ExifInterface.TAG_DATETIME);*/
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -135,6 +137,7 @@ public class PhotoCaptureActivity extends AppCompatActivity
                     if (pickedImageFile != null) {
                         overrideFile(croppedImage, pickedImageFile);
                         Toast.makeText(this, "Saved Image!", Toast.LENGTH_SHORT).show();
+                        cardCaptureImage.performClick();
                     }
                 }
             } else {
@@ -142,6 +145,7 @@ public class PhotoCaptureActivity extends AppCompatActivity
                     pickedImageFile = new File(pictureImagePath);
                     compressedFile = Util.getCompressedFile(pickedImageFile,
                             PhotoCaptureActivity.this);
+                    Util.timestampItAndSave(pictureImagePath, compressedFile);
                     if (compressedFile != null && pickedImageFile != null) {
                         overrideFile(compressedFile, pickedImageFile);
                     }
@@ -462,7 +466,6 @@ public class PhotoCaptureActivity extends AppCompatActivity
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Util.putTimeStampOnImage(imageFile);
                 Toast.makeText(PhotoCaptureActivity.this, getResources()
                                 .getString(R.string.saved_successfully),
                         Toast.LENGTH_SHORT).show();

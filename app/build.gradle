@@ -2,6 +2,8 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-android'
 apply plugin: 'com.bugsnag.android.gradle'
+apply plugin: 'com.google.gms.google-services'
+apply plugin: 'io.fabric'
 
 android {
     compileSdkVersion 28
@@ -35,6 +37,8 @@ dependencies {
     implementation "androidx.core:core-ktx:+"
     implementation 'id.zelory:compressor:2.1.0'
     debugImplementation 'com.awesomedroidapps:inappstoragereader:1.0.2'
+    // Add dependency
+    implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
     // Glide (Image loader)
     implementation 'com.github.bumptech.glide:glide:4.9.0'
     implementation 'me.dm7.barcodescanner:zxing:1.9.8'
@@ -42,6 +46,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'com.bugsnag:bugsnag-android:4.+'
 }
+
 repositories {
     mavenCentral()
 }

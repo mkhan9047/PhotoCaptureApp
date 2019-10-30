@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "159003843087",
+    "firebase_url": "https://photolibrarian-d3c76.firebaseio.com",
+    "project_id": "photolibrarian-d3c76",
+    "storage_bucket": "photolibrarian-d3c76.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:159003843087:android:2c766a55cfee4ab2f3e17a",
+        "android_client_info": {
+          "package_name": "app.photocapture.com"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "159003843087-mcvjv6g7cvil2paktusg8eq9nppgg3d0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "app.photocapture.com",
+            "certificate_hash": "1d933accb9e26aeb82cf240bd2bb3e9147cd98b3"
+          }
+        },
+        {
+          "client_id": "159003843087-jjv865goihimpr1rcoecmrv7jadsq18e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBuFNKxf92QPRn8QBBbIk0JTQaAbjkzmB8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "159003843087-jjv865goihimpr1rcoecmrv7jadsq18e.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -37,6 +37,7 @@ import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.bugsnag.android.Bugsnag;
+import com.crashlytics.android.Crashlytics;
 import com.theartofdev.edmodo.cropper.CropImage;
 
 import java.io.File;

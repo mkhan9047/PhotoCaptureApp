@@ -11,16 +11,25 @@ public class Constants {
         public static final Boolean DEFAULT_BOOLEAN = true;
     }
 
-    public static class IntentKeys{
+    public static class IntentKeys {
         public static final String QR_RESULT = "qr-result";
     }
 
-    public static class File{
+    public static class File {
         public static final String ROOT_FOLDER_NAME = "PhotoCaptureApp";
+    }
+
+    public static class ImageQuality {
+        public static final int HIGH = 2;
+        public static final int LOW = 1;
+        public static final int MEDIUM = 0;
     }
 
     public static class PreferenceKeys {
         public static final String IS_PREVIEW_IMAGE_ON = "preview-image";
         public static final String REFERENCE_NUMBER_INPUT_TYPE = "reference-number";
+        public static final String IMAGE_QUALITY_TYPE_IS_CUSTOM = "custom";
+        public static final String QUALITY_PERCENTENGE = "quality_percentage";
+        public static final String QUALITY_SELECTED = "quality_selected";
     }
 }

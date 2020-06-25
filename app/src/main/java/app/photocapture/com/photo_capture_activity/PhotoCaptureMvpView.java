@@ -5,4 +5,6 @@ interface PhotoCaptureMvpView {
     void onFolderNotFound();
     void onFolderCreateSuccess();
     void onFolderCreateError();
+    void onImageInfoSavedSuccess();
+    void onImageInfoSavedError(String message);
 }

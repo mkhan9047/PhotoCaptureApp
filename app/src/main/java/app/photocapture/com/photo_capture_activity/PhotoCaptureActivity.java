@@ -8,6 +8,7 @@ import androidx.appcompat.widget.AppCompatButton;
 import androidx.cardview.widget.CardView;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -19,8 +20,11 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.StrictMode;
 import android.provider.MediaStore;
+import android.provider.Settings;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
@@ -33,18 +37,29 @@ import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.bugsnag.android.Bugsnag;
+import com.crashlytics.android.Crashlytics;
+import com.theartofdev.edmodo.cropper.CropImage;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import app.photocapture.com.R;
+import app.photocapture.com.database_helper.ImageInfoDAO;
 import app.photocapture.com.qr_code_scan.QrCodeScanActivity;
 import app.photocapture.com.setting_activity.SettingActivity;
 import app.photocapture.com.util.Constants;
+import app.photocapture.com.util.GPSTracker;
 import app.photocapture.com.util.GlideUtils;
 import app.photocapture.com.util.PermissionUtils;
 import app.photocapture.com.util.SharedPrefUtils;
+import app.photocapture.com.util.Util;
 
 public class PhotoCaptureActivity extends AppCompatActivity
         implements View.OnClickListener, PhotoCaptureMvpView {
@@ -53,12 +68,14 @@ public class PhotoCaptureActivity extends AppCompatActivity
     EditText edtReferenceNumber;
     ImageButton btnSetting;
     AppCompatButton btnViewPhotos, btnExitApp;
+    GPSTracker gpsTracker;
     CardView cardViewQrCode,
             cardViewNewFolder,
             cardCaptureImage,
             cardCaptureVideo;
     boolean isGranted = true;
     String pictureImagePath;
+    File compressedFile = null;
     File pickedImageFile = null;
     String videoPath;
     boolean isImageRequest = false;
@@ -77,6 +94,7 @@ public class PhotoCaptureActivity extends AppCompatActivity
         askPermission();
         searchForExtra();
         createInitialFolder();
+        gpsTracker = new GPSTracker(this);
     }
 
     @Override
@@ -90,6 +108,8 @@ public class PhotoCaptureActivity extends AppCompatActivity
                 PermissionUtils.REQUEST_CODE_PERMISSION_LOCATION_AND_STORAGE,
                 Manifest.permission.READ_EXTERNAL_STORAGE,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.CAMERA
         );
     }
@@ -111,43 +131,85 @@ public class PhotoCaptureActivity extends AppCompatActivity
         photoCapturePresenter.checkIfFolderExists(s);
     }
 
+    /*ExifInterface exif = new ExifInterface(filePhoto.getPath());
+    String date=exif.getAttribute(ExifInterface.TAG_DATETIME);*/
 
+    @SuppressLint("HardwareIds")
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
-            if (requestCode == REQUEST_CAMERA) {
-                pickedImageFile = new File(pictureImagePath);
-                if (pickedImageFile.exists()) {
-                    if (SharedPrefUtils.INSTANCE.readPreViewImageStatus(
-                            Constants.PreferenceKeys.IS_PREVIEW_IMAGE_ON
-                    )) {
-                        showImageViewerDialog(pickedImageFile);
-                    } else {
+            if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+                CropImage.ActivityResult result = CropImage.getActivityResult(data);
+                if (result != null) {
+                    Uri resultUri = result.getUri();
+                    File croppedImage = new File(resultUri.getPath());
+                    if (pickedImageFile != null) {
+                        overrideFile(croppedImage, pickedImageFile);
+                        Toast.makeText(this, "Saved Image!", Toast.LENGTH_SHORT).show();
                         cardCaptureImage.performClick();
-                        Toast.makeText(this, getResources()
-                                        .getString(R.string.saved_successfully),
-                                Toast.LENGTH_SHORT).show();
                     }
-
                 }
-            } else if (requestCode == REQUEST_VIDEO) {
-                pickedVideoFile = new File(videoPath);
-                if (pickedVideoFile.exists()) {
-                    if (SharedPrefUtils.INSTANCE.readPreViewImageStatus(
-                            Constants.PreferenceKeys.IS_PREVIEW_IMAGE_ON
-                    )) {
-                        showVideoPreviewDialog(pickedVideoFile);
-                    } else {
-                        cardCaptureVideo.performClick();
-                        Toast.makeText(this, getResources()
-                                        .getString(R.string.saved_successfully),
-                                Toast.LENGTH_SHORT).show();
+            } else {
+                if (requestCode == REQUEST_CAMERA) {
+                    pickedImageFile = new File(pictureImagePath);
+                    compressedFile = Util.getCompressedFile(pickedImageFile,
+                            PhotoCaptureActivity.this);
+                    if (compressedFile != null && pickedImageFile != null) {
+                        overrideFile(compressedFile, pickedImageFile);
+                        photoCapturePresenter.saveImageInfo(
+                                new ImageInfoDAO(compressedFile.getName(),
+                                        edtReferenceNumber.getText().toString(),
+                                        Util.getCurrentDateTime(),
+                                        String.valueOf(gpsTracker.getLatitude()),
+                                        String.valueOf(gpsTracker.getLongitude()),
+                                        Settings.Secure.getString(getContentResolver(),
+                                                Settings.Secure.ANDROID_ID) != null ?
+                                                Settings.Secure.getString(getContentResolver(),
+                                                        Settings.Secure.ANDROID_ID) : "Not Found!"
+                                ),
+                                this
+                        );
                     }
+                    if (pickedImageFile != null)
+                        if (pickedImageFile.exists()) {
+                            if (SharedPrefUtils.INSTANCE.readPreViewImageStatus(
+                                    Constants.PreferenceKeys.IS_PREVIEW_IMAGE_ON
+                            )) {
+                                showImageViewerDialog(compressedFile);
+                            } else {
+                                cardCaptureImage.performClick();
+                                Toast.makeText(PhotoCaptureActivity.this, getResources()
+                                                .getString(R.string.saved_successfully),
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        }
 
+                } else if (requestCode == REQUEST_VIDEO) {
+                    pickedVideoFile = new File(videoPath);
+                    if (pickedVideoFile.exists()) {
+                        if (SharedPrefUtils.INSTANCE.readPreViewImageStatus(
+                                Constants.PreferenceKeys.IS_PREVIEW_IMAGE_ON
+                        )) {
+                            showVideoPreviewDialog(pickedVideoFile);
+                        } else {
+                            cardCaptureVideo.performClick();
+                            Toast.makeText(this, getResources()
+                                            .getString(R.string.saved_successfully),
+                                    Toast.LENGTH_SHORT).show();
+                        }
+
+                    }
                 }
             }
         }
+    }
+
+
+    private void startImageCropping(File file) {
+        // start cropping activity for pre-acquired image saved on the device
+        CropImage.activity(Uri.fromFile(file))
+                .start(this);
     }
 
     private void setListener() {
@@ -158,6 +220,47 @@ public class PhotoCaptureActivity extends AppCompatActivity
         cardCaptureImage.setOnClickListener(this);
         cardCaptureVideo.setOnClickListener(this);
         btnExitApp.setOnClickListener(this);
+    }
+
+    private void overrideFile(File source, File destination) {
+        InputStream in = null;
+        try {
+            in = new FileInputStream(source);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        OutputStream out = null;
+        try {
+            out = new FileOutputStream(destination);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        // Copy the bits from instream to outstream
+        byte[] buf = new byte[1024];
+        int len = 0;
+        while (true) {
+            try {
+                if (!((len = in.read(buf)) > 0)) break;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                out.write(buf, 0, len);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        try {
+            in.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            out.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void initViews() {
@@ -196,8 +299,8 @@ public class PhotoCaptureActivity extends AppCompatActivity
         File storageDir = new File(Environment.getExternalStorageDirectory() + File.separator +
                 Constants.File.ROOT_FOLDER_NAME + File.separator + folderName);
         pictureImagePath = storageDir.getAbsolutePath() + "/" + imageFileName;
-        File file = new File(pictureImagePath);
-        Uri outputFileUri = Uri.fromFile(file);
+        pickedImageFile = new File(pictureImagePath);
+        Uri outputFileUri = Uri.fromFile(pickedImageFile);
         Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, outputFileUri);
         startActivityForResult(cameraIntent, REQUEST_CAMERA);
@@ -348,6 +451,15 @@ public class PhotoCaptureActivity extends AppCompatActivity
                 Toast.LENGTH_SHORT).show();
     }
 
+    @Override
+    public void onImageInfoSavedSuccess() {
+    }
+
+    @Override
+    public void onImageInfoSavedError(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
     private void showImageViewerDialog(final File imageFile) {
         final Dialog dialog = new Dialog(this,
                 android.R.style.Theme_Light_NoTitleBar_Fullscreen);
@@ -355,6 +467,16 @@ public class PhotoCaptureActivity extends AppCompatActivity
         ImageView imageViewPickedImage = dialog.findViewById(R.id.image_view_show);
         Button btnDiscard = dialog.findViewById(R.id.btn_discard);
         Button btnSave = dialog.findViewById(R.id.btn_save);
+        Button btnCrop = dialog.findViewById(R.id.btn_crop);
+        btnCrop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (imageFile.exists()) {
+                    startImageCropping(imageFile);
+                    dialog.dismiss();
+                }
+            }
+        });
         btnDiscard.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

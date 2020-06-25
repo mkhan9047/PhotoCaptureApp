@@ -34,7 +34,8 @@ public class QrCodeScanActivity extends AppCompatActivity implements
     @Override
     public void onPause() {
         super.onPause();
-        zXingScannerView.stopCamera();// Stop camera on pause
+        zXingScannerView.stopCamera();
+        // Stop camera on pause
     }
 
     @Override

@@ -30,9 +30,25 @@
         android:background="@color/colorAccent"
         android:text="Save"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/btn_discard"
+        app:layout_constraintEnd_toStartOf="@id/btn_crop"
         app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/btn_crop"
+        android:layout_width="0dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@color/colorAccent"
+        android:text="Crop"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintEnd_toStartOf="@id/btn_discard"
+        app:layout_constraintStart_toEndOf="@id/btn_save"/>
+
 
     <Button
         android:id="@+id/btn_discard"
@@ -47,7 +63,7 @@
         android:text="Discard"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/btn_save" />
+        app:layout_constraintStart_toEndOf="@id/btn_crop" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

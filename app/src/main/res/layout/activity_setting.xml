@@ -31,11 +31,11 @@
         app:layout_constraintTop_toTopOf="@id/view_input_type" />
 
     <RadioGroup
+        android:id="@+id/radio_group"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
-        android:id="@+id/radio_group"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="@id/view_input_type"
@@ -44,22 +44,21 @@
         app:layout_constraintTop_toTopOf="@id/view_input_type">
 
         <RadioButton
+            android:id="@+id/radio_numric"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/radio_numric"
             android:gravity="center_vertical"
             android:text="Numric"
-            android:textColor="@color/color_white"
-            />
+            android:textColor="@color/color_white" />
 
         <RadioButton
+            android:id="@+id/radio_alpha_numric"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:id="@+id/radio_alpha_numric"
             android:layout_marginLeft="8dp"
-            android:textColor="@color/color_white"
-            android:text="Alpha-Numric" />
+            android:text="Alpha-Numric"
+            android:textColor="@color/color_white" />
     </RadioGroup>
     <!--image preview section-->
 
@@ -81,12 +80,109 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
-        android:textColor="@color/color_white"
         android:text="Preview Image after capture  "
+        android:textColor="@color/color_white"
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="@id/view_image_preview"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/view_image_preview" />
+
+
+    <View
+        android:id="@+id/view_image_quality"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="8dp"
+        android:background="@color/colorPrimary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/view_image_preview" />
+
+    <TextView
+        android:id="@+id/tv_image_quality"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:text="Image Quality"
+        android:textColor="@color/color_white"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@id/view_image_quality"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/view_image_quality" />
+
+    <Spinner
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:id="@+id/spinner_quality"
+        android:entries="@array/quality_text"
+        android:spinnerMode="dropdown"
+        android:theme="@style/ThemeOverlay.AppCompat.Light"
+        app:layout_constraintBottom_toBottomOf="@id/view_image_quality"
+        app:layout_constraintEnd_toStartOf="@id/checkbox_custom"
+        app:layout_constraintStart_toEndOf="@id/tv_image_quality"
+        app:layout_constraintTop_toTopOf="@id/view_image_quality" />
+
+    <CheckBox
+        android:id="@+id/checkbox_custom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:text="Custom"
+        app:layout_constraintBottom_toBottomOf="@id/view_image_quality"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/view_image_quality" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_custom_image_quality"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/view_image_quality">
+
+        <View
+            android:id="@+id/view_image_quality_percentage"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="8dp"
+            android:background="@color/colorPrimary"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_image_quality_percentage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
+            android:text="Quality Range: "
+            android:textColor="@color/color_white"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toBottomOf="@id/view_image_quality_percentage"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/view_image_quality_percentage" />
+
+        <SeekBar
+            android:id="@+id/seek_bar_image_quality"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:indeterminate="false"
+            android:progress="0"
+            app:layout_constraintBottom_toBottomOf="@id/tv_image_quality_percentage"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/tv_image_quality_percentage"
+            app:layout_constraintTop_toTopOf="@id/tv_image_quality_percentage" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

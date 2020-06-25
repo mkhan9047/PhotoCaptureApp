@@ -49,6 +49,19 @@ object SharedPrefUtils {
     }
 
     /**
+     * This method writes a value to the [SharedPreferences]
+     * @param key the key we are using to keep the value
+     * @param value the value we want to keep
+     * @return if the value is stored or not
+     * */
+    fun write(key: String, value: Boolean): Boolean {
+        val editor = preferences!!.edit()
+        editor.putBoolean(key, value)
+        return editor.commit()
+    }
+
+
+    /**
      * This method returns a value from the [SharedPreferences]
      * @param key the key we are using to keep the value
      * @return desired value
@@ -149,7 +162,7 @@ object SharedPrefUtils {
      * @return desired value
      * */
     fun readBoolean(key: String): Boolean {
-        return preferences!!.getBoolean(key, Constants.Default.DEFAULT_BOOLEAN)
+        return preferences!!.getBoolean(key, false)
     }
 
     /**
